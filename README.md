@@ -35,12 +35,9 @@
 
 # E-R 다이어그램
 
-<img src='https://github.com/oals/portfolioLibrary/assets/136543676/ffaa8bf6-e976-4a16-891b-d0d43e4bd59b'>
 
 
 # 핵심 기능 및 페이지 소개
-
-
 
 
 <br>
