@@ -35,6 +35,7 @@
 
 # E-R 다이어그램
 
+![erd 편집](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/b4cfe8ed-cc24-40ff-baf6-abe7a57b2b43)
 
 
 # 핵심 기능 및 페이지 소개
@@ -46,8 +47,10 @@
 
 
 
-<h3>관리자 페이지</h3>
+<h3>로그인 및 메인 페이지</h3>
 <br>
+
+![freecompress-로그인 메인](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/f2be8543-44ea-4d3c-a073-4168f3f2b76f)
 
 
 <br>
@@ -62,9 +65,205 @@
 
 <UL>
 
- <LI</LI>
+ <LI>메인 페이지 설명</LI>
 </UL>
 
+
+
+<br>
+<br>
+
+
+
+
+<h3>프로필 변경 </h3>
+<br>
+
+![프로필 변경](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/1f4ee25c-efb8-43f4-8b68-b2b0256ed4bc)
+
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li> 프로필 변경 설명</li>
+</UL>
+
+<br>
+<br>
+
+
+
+
+<h3>업로드</h3>
+<br>
+
+![업로드](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/789c0437-15f2-41b8-b07e-a28b454b9cb3)
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li> 업로드 설명</li>
+</UL>
+
+
+<br>
+<br>
+
+
+
+
+<h3>좋야요 및 댓글 작성</h3>
+<br>
+
+![freecompress-좋아요 댓글](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/e801e413-3ffd-4e2e-88ac-886b0d4460d6)
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li>좋아요 및 댓글 설명 </li>
+</UL>
+
+
+<br>
+<br>
+
+
+
+
+<h3>태그 및 검색 </h3>
+<br>
+
+![freecompress-태그 및 검색](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/1bfcef8f-e9a0-4aca-8616-8a4a664b9420)
+
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li>태그 및 검색 설명 </li>
+</UL>
+
+
+<br>
+<br>
+
+
+
+
+<h3>팔로우 및 언팔로우 </h3>
+<br>
+
+![팔로우](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/d95f15a4-f25a-4a9a-bf1e-a7589a25a0de)
+
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li> 팔로우 및 언팔로우 설명 </li>
+</UL>
+
+
+<br>
+<br>
+
+
+
+
+<h3>알림</h3>
+<br>
+
+![알림 및 메세지 답장](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/9501bc14-0e48-40cf-83be-a632f27ea45b)
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li> 알림 설명 </li>
+</UL>
+
+
+<br>
+<br>
+
+
+
+
+<h3> 채팅</h3>
+<br>
+
+![메세지 보내기](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/c8a05319-0a39-44aa-855f-0f92f0ae4279)
+
+
+![채팅 대화](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/5ef152b2-da72-4ded-9bca-69893704cdc4)
+
+
+
+<br>
+<br>
+
+<details>
+ <summary> 
+ 
+ </summary> 
+ 
+</details>
+
+<UL>
+
+<li>메세지 보내기 설명 </li>
+</UL>
 
 
 # 프로젝트를 통해 느낀 점과 소감
