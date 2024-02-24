@@ -1348,7 +1348,7 @@
             session.sendMessage(new TextMessage(jsonMessage.toString()));
         }
      }  
-   }
+     }
 
 </details>
  
