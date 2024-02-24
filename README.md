@@ -6,7 +6,7 @@
 인스타그램의 디자인과 기능을 모방한 사이트 입니다. <br>
 피드를 작성 할 수 있고 좋아요, 댓글 작성, 검색 , 실시간 알림, 메세지 기능을 구현한 사이트 입니다.
 
-백엔드는 스프링부트를 사용하였고 <br>
+백엔드는 스프링부트를 사용 하였고 <br>
 프론트엔드는 리엑트를 사용하여 개발했습니다.
 
 프론트엔드 코드 주소 : https://github.com/oals/PortfolioSocialNetWork-frontEnd
@@ -520,6 +520,8 @@
  
 </details>
 
+
+
 <UL>
 
  <LI>최신 피드를 감상 할 수 있습니다.</LI>
@@ -550,6 +552,96 @@
  
 </details>
 
+<details>
+ <summary> 프로필 변경 서비스 
+ 
+ </summary> 
+
+
+
+
+    @Override
+    public String updateMemberProfileImage(MemberProfileUpdateDTO memberProfileUpdateDTO) {
+
+        Member member = memberRepository.findById(memberProfileUpdateDTO.getMemberId()).orElseThrow();
+
+        member.setMemberId(memberProfileUpdateDTO.getMemberId());
+        member.setMemberSchoolName(memberProfileUpdateDTO.getMemberSchoolName());
+        member.setMemberJobTitle(memberProfileUpdateDTO.getMemberJobTitle());
+        member.setMemberName(memberProfileUpdateDTO.getMemberName());
+
+        if(memberProfileUpdateDTO.getMemberProfileImage() != null) {
+
+            if(!member.getMemberProfileImage().equals("c:/SocialNetwork/normalProfileImage.jpg")) {
+                fileService.deleteFile(member.getMemberProfileImage());
+                fileService.deleteFile(member.getMemberProfileImage().replace("Resized", ""));
+            }
+
+            String profileImagePath = fileService.uploadMemberProfileImage(memberProfileUpdateDTO.getMemberId(), memberProfileUpdateDTO.getMemberProfileImage());
+            String resizeProfileImagePath = fileService.resizeImage(profileImagePath, 200, 200);
+            member.setMemberProfileImage(resizeProfileImagePath);
+        }
+
+        memberRepository.save(member);
+
+        return member.getMemberProfileImage();
+    }
+
+
+
+
+
+ 
+ 
+</details>
+
+
+
+<details>
+ <summary> 업로드 서비스
+ 
+ </summary> 
+
+
+
+
+      @Override
+      public String uploadMemberProfileImage(String memberId, MultipartFile profileImage) {
+
+        String path = itemImgLocation + "/Member/" + memberId;  
+
+        //게시글 폴더 생성
+        createDirectoryService.CreateDebatePostImageFolder(path);    
+
+
+        UUID uuid = UUID.randomUUID();
+
+        String mimeType = profileImage.getContentType();
+        String extension = mimeType.split("/")[1]; // "png", "jpeg" 등
+        String savedFileName = uuid + "." + extension;
+        String fileUploadFullUrl = path + "/"+ savedFileName;
+        // 결과 : 업로드할 경로 + / + uuid값 + .파일확장자
+        try {
+            FileOutputStream fos = new FileOutputStream(fileUploadFullUrl);
+            fos.write(profileImage.getBytes());
+            fos.close();
+        }catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        
+
+        return fileUploadFullUrl;
+    }
+
+
+ 
+</details>
+
+
+
+
 <UL>
 
 <li>프로필 이미지,이름,직업,학교 의 정보를 변경 할 수 있도록 구현했습니다 </li>
@@ -577,6 +669,159 @@
  
 </details>
 
+<details>
+ <summary> 업로드 서비스
+ 
+ </summary> 
+
+
+
+    @Override
+    public FeedListDTO insertFeed(FeedFormDTO feedFormDTO) {
+
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String createFeedTime = now.format(formatter);
+
+
+
+        Long articleNo =  feedRepository.findAll().stream().count() + 1;
+        
+        List<String> imageFileList =  fileService.uploadFeedImage(feedFormDTO.getFeedImageList(),articleNo);
+
+        for(int i =0; i < imageFileList.size(); i++){
+           imageFileList.set(i,fileService.resizeImage(imageFileList.get(i),400,600));
+        }
+
+
+        Member member = Member.builder()
+                .memberId(feedFormDTO.getMemberId())
+                .build();
+
+        Feed feed = Feed.builder()
+                .feedContent(feedFormDTO.getFeedContent())
+                .feedCommentList(new ArrayList<>())
+                .feedLikeList(new ArrayList<>())
+                .feedThumnailImage(imageFileList.get(0))
+                .feedDate(createFeedTime)
+                .member(member)
+                .build();
+
+        feedRepository.save(feed);
+
+        for (String imageFile : imageFileList) {
+            FeedImage feedImage = FeedImage.builder()
+                    .feed(feed)
+                    .feedImage(imageFile)
+                    .build();
+            // FeedImage 객체 저장
+            feedImageRepository.save(feedImage);
+        }
+
+
+        for (String tagList : feedFormDTO.getFeedContentTagList()) {
+                FeedTag feedTag = FeedTag.builder()
+                        .feed(feed)
+                        .feedTagName(tagList)
+                        .build();
+
+            // FeedTag 객체 저장
+            feedTagRepository.save(feedTag);
+        }
+
+
+        FeedListDTO feedListDTO = FeedListDTO.builder()
+                .feedId(feed.getFeedId())
+                .feedCommentCount(0L)
+                .feedLikeCount(0L)
+                .feedThumnailImage(feed.getFeedThumnailImage())
+                .build();
+
+
+
+
+        return feedListDTO;
+    }
+
+
+    
+
+ 
+</details>
+
+
+
+<details>
+ <summary> 이미지 업로드 서비스
+ 
+ </summary> 
+
+
+
+    @Override
+    public List<String> uploadFeedImage(List<MultipartFile> list,Long articleNo) {
+
+
+
+        List<String> imageFileUrlList = new ArrayList<>();
+
+
+        if(list.size() != 0) {   //해당 글 내용에 이미지가 있으면
+
+            //이미지 저장 폴더 경로
+            String path = itemImgLocation + "/Feed/" + articleNo;  
+
+            //게시글 폴더 생성
+            createDirectoryService.CreateDebatePostImageFolder(path);   
+
+            //이미지 파일 업로드
+            for(int i = 0; i <  list.size(); i++) {
+
+                //이미지 파일 업로드
+                if(!list.get(i).getOriginalFilename().isEmpty()){
+
+                    UUID uuid = UUID.randomUUID();
+
+                    String savedFileName = uuid + list.get(i).getOriginalFilename(); // 난수에 확장자 붙이기
+                    String fileUploadFullUrl = path + "/"+ savedFileName;
+                    // 결과 : 업로드할 경로 + / + uuid값 + .파일확장자
+                    try {
+                        FileOutputStream fos = new FileOutputStream(fileUploadFullUrl);
+                        fos.write(list.get(i).getBytes());
+                        fos.close();
+                    }catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+
+                    imageFileUrlList.add(fileUploadFullUrl);
+
+                }else{
+                    imageFileUrlList.add(null);
+                }
+            }
+        }
+
+
+
+
+
+        //업로드 완료
+        return imageFileUrlList;
+
+
+      }
+
+
+ 
+</details>
+
+
+
 <UL>
 
 <li> 여러 이미지를 업로드 할 수 있고 게시물의 내용과 태그를 구분해서 입력 받도록 구현 했습니다.</li>
@@ -599,11 +844,182 @@
 <br>
 
 <details>
- <summary> 
+ <summary> 중복 좋아요 검사 서비스
  
  </summary> 
+
+
+   @Override
+    public boolean FeedLikeChk(Long feedId, String memberId) {
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QFeedLike qFeedLike = QFeedLike.feedLike;
+
+
+        boolean feedLikeChk = queryFactory.selectFrom(qFeedLike)
+                .where(qFeedLike.member.memberId.eq(memberId).and(qFeedLike.feed.feedId.eq(feedId)))
+                .fetch().isEmpty();
+
+
+        return feedLikeChk;
+    }
+
+    
  
 </details>
+
+
+<details>
+ <summary> 좋아요 서비스
+ 
+ </summary> 
+
+
+
+   @Override
+    public boolean insertFeedLike(Long feedId, String memberId) {
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QNotification qNotification = QNotification.notification;
+
+
+        try{
+            Feed feed = feedRepository.findById(feedId).orElseThrow();
+
+            Member sendMember = Member.builder()
+                    .memberId(memberId)
+                    .build();
+
+            FeedLike feedLike = FeedLike.builder()
+                    .feed(feed)
+                    .member(sendMember)
+                    .build();
+
+            feedLikeRepository.save(feedLike);
+
+
+
+            boolean viewChk = jpaQueryFactory.selectFrom(qNotification)
+                    .where(qNotification.feedLike.feedId.eq(feed.getFeedId())
+                            .and(qNotification.sendMember.memberId.eq(sendMember.getMemberId()))
+                            .and(qNotification.viewChk.isFalse()))
+                    .fetch().stream().count() == 0;
+
+
+            if(viewChk) {
+
+                NotificationDTO notificationDTO = NotificationDTO.builder()
+                        .sendMemberId(sendMember.getMemberId())
+                        .readMemberId(feed.getMember().getMemberId())
+                        .notificationMessageType(1)
+                        .likeFeedId(feed.getFeedId())
+                        .build();
+
+                notificationService.createNotification(notificationDTO);
+            }
+            return true;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+      }
+    
+ 
+</details>
+
+
+
+
+<details>
+ <summary> 댓글 작성 서비스
+ 
+ </summary> 
+
+
+
+
+    @Override
+    public FeedCommentDTO insertFeedComment(FeedCommentDTO feedCommentDTO) {
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QNotification qNotification = QNotification.notification;
+
+        try{
+            Member sendMember = memberRepository.findById(feedCommentDTO.getMemberId()).orElseThrow();
+
+
+            Feed feed = feedRepository.findById(feedCommentDTO.getFeedId()).orElseThrow();
+
+
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String commentDate = now.format(formatter);
+
+            FeedComment feedComment = FeedComment.builder()
+                    .feedCommentContent(feedCommentDTO.getFeedCommentContent())
+                    .feedCommentDate(commentDate)
+                    .feedCommentParent(feedCommentDTO.getFeedCommentParent())
+                    .feed(feed)
+                    .member(sendMember)
+                    .build();
+
+
+            feedCommentRepository.save(feedComment);
+
+            FeedCommentDTO feedCommentDTO1 = FeedCommentDTO.builder()
+                    .feedCommentId(feedComment.getFeedCommentId())
+                    .feedCommentParent(feedComment.getFeedCommentParent())
+                    .feedCommentContent(feedComment.getFeedCommentContent())
+                    .feedCommentDate(feedComment.getFeedCommentDate())
+                    .memberId(sendMember.getMemberId())
+                    .memberProfileImage(sendMember.getMemberProfileImage())
+                    .feedId(feed.getFeedId())
+                    .build();
+
+
+
+
+            boolean viewChk = jpaQueryFactory.selectFrom(qNotification)
+                    .where(qNotification.feedComment.feedId.eq(feedCommentDTO.getFeedId())
+                            .and(qNotification.sendMember.memberId.eq(feedCommentDTO.getMemberId()))
+                            .and(qNotification.viewChk.isFalse()))
+                    .fetch().stream().count() == 0;
+
+
+            if(viewChk) { //실시간 알림 생성
+                NotificationDTO notificationDTO = NotificationDTO.builder()
+                        .sendMemberId(sendMember.getMemberId())
+                        .readMemberId(feed.getMember().getMemberId())
+                        .notificationMessageType(2)
+                        .commentFeedId(feed.getFeedId())
+                        .build();
+
+                notificationService.createNotification(notificationDTO);
+            }
+
+            return feedCommentDTO1;
+        }catch(Exception e){
+            e.printStackTrace();
+
+            return null;
+        }
+
+
+
+
+    }
+    }
+
+
+    
+ 
+</details>
+
+
+
+
+
 
 <UL>
 
@@ -634,6 +1050,56 @@
  
 </details>
 
+
+<details>
+ <summary> 검색 서비스
+ 
+ </summary> 
+
+
+
+     @Override
+     public List<FeedListDTO> selectTagFeed(String TagName) {
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QFeedTag qFeedTag = QFeedTag.feedTag;
+        QFeed qFeed = QFeed.feed;
+
+        List<Long> feedIdlist = jpaQueryFactory.select(qFeed.feedId).from(qFeedTag)
+                .where(qFeedTag.feedTagName.eq(TagName))
+                .fetch();
+
+        List<Tuple> queryList = jpaQueryFactory.select(
+                        qFeed.feedId,
+                        qFeed.feedThumnailImage,
+                        qFeed.feedLikeList.size(),
+                        qFeed.feedCommentList.size()
+                ).from(qFeed)
+                .where(qFeed.feedId.in(feedIdlist)) 
+                .fetch();
+
+
+        List<FeedListDTO> feedlist = new ArrayList<>();
+        for(int i = 0; i < queryList.size(); i++){
+            FeedListDTO feedListDTO = FeedListDTO.builder()
+                    .feedId(queryList.get(i).get(qFeed.feedId))
+                    .feedCommentCount((long) queryList.get(i).get(qFeed.feedCommentList.size()))
+                    .feedLikeCount((long) queryList.get(i).get(qFeed.feedLikeList.size()))
+                    .feedThumnailImage(queryList.get(i).get(qFeed.feedThumnailImage))
+                    .build();
+            feedlist.add(feedListDTO);
+        }
+
+        return feedlist;
+      }
+
+    
+ 
+</details>
+
+
+
+
 <UL>
 
 <li>태그 클릭 및 태그 검색 시 관련된 피드들을 가져오도록 구현했습니다. </li>
@@ -662,6 +1128,110 @@
  
 </details>
 
+
+
+<details>
+ <summary> 팔로우 서비스
+ 
+ </summary> 
+
+
+
+
+    @Override
+    public boolean insertFollowMember(String followMember, String followerMember) {
+
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QNotification qNotification = QNotification.notification;
+
+        try{
+            Member memberFollow = Member.builder()
+                    .memberId(followMember)
+                    .build();
+
+            Member memberFollower = Member.builder()
+                    .memberId(followerMember)
+                    .build();
+
+
+            Follow follow = Follow.builder()
+                    .followMember(memberFollow)
+                    .followerMember(memberFollower)
+                    .build();
+
+            followRepository.save(follow);
+
+
+
+            boolean viewChk = jpaQueryFactory.selectFrom(qNotification)
+                    .where(qNotification.follow.memberId.eq(follow.getFollowerMember().getMemberId())
+                            .and(qNotification.readMember.memberId.eq(follow.getFollowMember().getMemberId()))
+                            .and(qNotification.viewChk.isFalse()))
+                    .fetch().stream().count() == 0;
+
+
+            if(viewChk) {//실시간 알림 생성
+
+                NotificationDTO notificationDTO = NotificationDTO.builder()
+                        .sendMemberId(memberFollower.getMemberId())
+                        .readMemberId(memberFollow.getMemberId())
+                        .notificationMessageType(3)
+                        .followMemberId(memberFollower.getMemberId())
+                        .build();
+
+                notificationService.createNotification(notificationDTO);
+            }
+
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+      }
+
+    
+ 
+</details>
+
+
+
+
+
+<details>
+ <summary> 언팔로우 서비스
+ 
+ </summary> 
+ 
+</details>
+
+
+
+    @Transactional
+    @Override
+    public boolean deleteUnFollowMember(String followMember, String followerMember) {
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QFollow qFollow = QFollow.follow;
+
+        try{
+            jpaQueryFactory.delete(qFollow)
+                    .where(qFollow.followMember.memberId.eq(followMember)
+                            .and(qFollow.followerMember.memberId.eq(followerMember)))
+                    .execute();
+
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    
+
+
+
 <UL>
 
 <li>유저간의 팔로우 팔로워 관계를 구현했습니다. </li>
@@ -683,12 +1253,132 @@
 <br>
 <br>
 
+
+
+</details>
+
+
+
 <details>
  <summary> 
  
  </summary> 
  
 </details>
+
+
+
+<details>
+ <summary> 알림 서비스
+ 
+ </summary> 
+
+
+    @Override
+    public boolean createNotification(NotificationDTO notificationDTO) {
+
+        if(notificationDTO.getSendMemberId().equals(notificationDTO.getReadMemberId())){
+            return true;
+        }
+
+        try{
+            Member sendMember = Member.builder()
+                    .memberId(notificationDTO.getSendMemberId())
+                    .build();
+
+            Member readMember = Member.builder()
+                    .memberId(notificationDTO.getReadMemberId())
+                    .build();
+
+
+
+            Feed feedLikeData = null;
+            Feed commentData = null;
+            Member followData = null;
+            ChatRoom chatRoomData = null;
+
+            if(notificationDTO.getNotificationMessageType() == 1){
+                feedLikeData = feedRepository.findById(notificationDTO.getLikeFeedId()).orElseThrow();
+            }else if(notificationDTO.getNotificationMessageType() == 2){
+                commentData = feedRepository.findById(notificationDTO.getCommentFeedId()).orElseThrow();
+            }else if(notificationDTO.getNotificationMessageType() == 3){
+                followData = memberRepository.findById(notificationDTO.getFollowMemberId()).orElseThrow();
+            }else if(notificationDTO.getNotificationMessageType() == 4) {
+                chatRoomData = chatRoomRepository.findById(notificationDTO.getChatRoomId()).orElseThrow();
+            }
+
+            Notification notification = Notification.builder()
+                    .notificationMessageType(notificationDTO.getNotificationMessageType())
+                    .sendMember(sendMember)
+                    .readMember(readMember)
+                    .feedLike(feedLikeData) // 해당 피드
+                    .feedComment(commentData) //해당 피드
+                    .follow(followData)  //해당 멤버 정보
+                    .chatRoom(chatRoomData)
+                    .build();
+
+            notificationRepository.save(notification);
+
+            simpleTextHandler.sendMessageToAll(notificationDTO.getSendMemberId(),notificationDTO.getReadMemberId());
+
+            // 알림 생성 후 실시간으로 전송
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+
+      }
+
+
+ 
+ 
+</details>
+
+
+<details>
+ <summary> 실시간 알림 전송 소켓 코드
+ 
+ </summary> 
+
+
+
+    @Component
+    @Log4j2
+    public class SimpleTextHandler extends TextWebSocketHandler {
+    private ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) {
+        System.out.println("Received message123: " + message.getPayload());
+    }
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        sessions.put(session.getId(), session);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        sessions.remove(session.getId());
+    }
+
+    public void sendMessageToAll(String sendMemberId, String readMemberId) throws Exception {
+        log.info(sessions);
+
+        for (WebSocketSession session : sessions.values()) {
+            JsonObject jsonMessage = new JsonObject();
+            jsonMessage.addProperty("sendMemberId", sendMemberId);
+            jsonMessage.addProperty("readMemberId", readMemberId);
+
+            session.sendMessage(new TextMessage(jsonMessage.toString()));
+        }
+     }  
+   }
+
+
+ 
 
 <UL>
 
@@ -715,6 +1405,215 @@
 
 <br>
 <br>
+
+<details>
+ <summary> 채팅방 생성 서비스
+ 
+ </summary> 
+
+
+
+     @Override
+     public ChatRoomDTO createChatRoom(String memberId, String memberId2) {
+
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QChatRoom qChatRoom = QChatRoom.chatRoom;
+
+        boolean chatRoomChk = jpaQueryFactory.selectFrom(qChatRoom)
+                .where(qChatRoom.chatMemberId.memberId.eq(memberId)
+                        .and(qChatRoom.chatMemberId2.memberId.eq(memberId2))
+                        .or(qChatRoom.chatMemberId.memberId.eq(memberId2)
+                                .and(qChatRoom.chatMemberId2.memberId.eq(memberId))))
+                .fetch().stream().count() == 0;
+
+
+        if(chatRoomChk){
+
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String createChatRoom = now.format(formatter);
+
+
+            try{
+                Member member = memberRepository.findById(memberId).orElseThrow();
+
+                Member member2 = memberRepository.findById(memberId2).orElseThrow();
+
+
+                ChatRoom chatRoom = ChatRoom.builder()
+                        .chatMemberId(member)
+                        .chatMemberId2(member2)
+                        .chatMessageList(new ArrayList<>())
+                        .LastUseDate(createChatRoom)
+                        .build();
+
+                chatRoomRepository.save(chatRoom);
+
+
+                ChatRoomDTO newChatRoomDTO = new ChatRoomDTO();
+
+                newChatRoomDTO.setChatRoomId(chatRoom.getChatRoomId());
+                if(memberId.equals(chatRoom.getChatMemberId().getMemberId())){
+                    newChatRoomDTO.setMemberId(member2.getMemberId());
+                    newChatRoomDTO.setMemberProfileImage(member2.getMemberProfileImage());
+                }else{
+                    newChatRoomDTO.setMemberId(member.getMemberId());
+                    newChatRoomDTO.setMemberProfileImage(member.getMemberProfileImage());
+                }
+
+
+                return newChatRoomDTO;
+
+            }catch(Exception e){
+                e.printStackTrace();
+                return null;
+            }
+
+        }else{
+            return null;
+        }
+
+
+
+      }
+
+
+ 
+</details>
+
+
+<details>
+ <summary> 채팅 메세지 조회 서비스
+ 
+ </summary> 
+
+
+
+    @Override
+    public ChatDTO selectChatMessage(Long chatRoomId, String memberId) {
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow();
+
+        ChatDTO chatDTO = new ChatDTO();
+        chatDTO.setChatRoomId(chatRoomId);
+
+        if(memberId.equals(chatRoom.getChatMemberId().getMemberId())){
+            chatDTO.setMemberId(chatRoom.getChatMemberId2().getMemberId());
+            chatDTO.setMemberProfileImage(chatRoom.getChatMemberId2().getMemberProfileImage());
+        }else{
+            chatDTO.setMemberId(chatRoom.getChatMemberId().getMemberId());
+            chatDTO.setMemberProfileImage(chatRoom.getChatMemberId().getMemberProfileImage());
+        }
+
+
+        List<ChatMessageDTO> chatMessageDTOS = new ArrayList<>();
+
+        for(int i = 0; i < chatRoom.getChatMessageList().size(); i++){
+            ChatMessageDTO chatMessageDTO = ChatMessageDTO.builder()
+                    .chatMessageNo(chatRoom.getChatMessageList().get(i).getChatMessageNo())
+                    .chatMessage(chatRoom.getChatMessageList().get(i).getChatMessage())
+                    .chatMessageDate(chatRoom.getChatMessageList().get(i).getChatMessageDate())
+                    .memberId(chatRoom.getChatMessageList().get(i).getMember().getMemberId())
+                    .build();
+
+            chatMessageDTOS.add(chatMessageDTO);
+        }
+
+        chatDTO.setChatMessageDTOList(chatMessageDTOS);
+
+
+
+        return chatDTO;
+      }
+
+
+
+ 
+ 
+</details>
+
+
+
+<details>
+ <summary> 채팅 메세지 전송 서비스
+ 
+ </summary> 
+
+
+
+    @Override
+    public ChatMessageDTO insertChatMessage(ChatMessageDTO chatMessageDTO) {
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String createChatMessage = now.format(formatter);
+
+
+        ChatRoom chatRoom = chatRoomRepository.findById(chatMessageDTO.getChatRoomId()).orElseThrow();
+
+        Member member = Member.builder()
+                .memberId(chatMessageDTO.getMemberId())
+                .build();
+
+        JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(em);
+        QNotification qNotification = QNotification.notification;
+
+        boolean viewChk = jpaQueryFactory.selectFrom(qNotification)
+                .where(qNotification.chatRoom.chatRoomId.eq(chatRoom.getChatRoomId())
+                        .and(qNotification.viewChk.isFalse()))
+                .fetch().stream().count() == 0;
+
+        if (viewChk) {
+
+            String readMemberId = "";
+            if(member.getMemberId().equals(chatRoom.getChatMemberId().getMemberId())){
+                readMemberId = chatRoom.getChatMemberId2().getMemberId();
+            }else{
+                readMemberId = chatRoom.getChatMemberId().getMemberId();
+            }
+
+
+            NotificationDTO notificationDTO = NotificationDTO.builder()
+                    .sendMemberId(member.getMemberId())
+                    .readMemberId(readMemberId)
+                    .notificationMessageType(4)
+                    .chatRoomId(chatRoom.getChatRoomId())
+                    .build();
+
+            notificationService.createNotification(notificationDTO);
+        }
+
+
+        chatRoom.updateLastUseDate(createChatMessage); //채팅방 사용시간 업데이트
+        chatRoomRepository.save(chatRoom);
+
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatMessage(chatMessageDTO.getChatMessage())
+                .chatMessageDate(createChatMessage)
+                .chatRoom(chatRoom)
+                .member(member)
+                .build();
+
+        chatMessageRepository.save(chatMessage);
+
+
+        ChatMessageDTO newChatMessageDTO = ChatMessageDTO.builder()
+                .chatMessageNo(chatMessage.getChatMessageNo())
+                .chatMessageNo(chatMessage.getChatMessageNo())
+                .chatMessage(chatMessage.getChatMessage())
+                .memberId(chatMessage.getMember().getMemberId())
+                .build();
+
+
+
+        return newChatMessageDTO;
+    }
+
+
+ 
+</details>
+
 
 <details>
  <summary> 
