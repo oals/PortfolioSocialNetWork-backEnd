@@ -1377,7 +1377,7 @@
      }  
    }
 
-
+</details>
  
 
 <UL>
@@ -1615,12 +1615,6 @@
 </details>
 
 
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
 
 <UL>
 
