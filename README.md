@@ -513,12 +513,7 @@
 <br>
 <br>
 
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
+
 
 
 
@@ -545,12 +540,7 @@
 <br>
 <br>
 
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
+
 
 <details>
  <summary> 프로필 변경 서비스 
@@ -662,12 +652,7 @@
 <br>
 <br>
 
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
+
 
 <details>
  <summary> 업로드 서비스
@@ -1043,12 +1028,6 @@
 <br>
 <br>
 
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
 
 
 <details>
@@ -1120,13 +1099,6 @@
 
 <br>
 <br>
-
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
 
 
 
@@ -1204,7 +1176,6 @@
  
  </summary> 
  
-</details>
 
 
 
@@ -1229,7 +1200,7 @@
     }
 
     
-
+</details>
 
 
 <UL>
@@ -1258,13 +1229,6 @@
 </details>
 
 
-
-<details>
- <summary> 
- 
- </summary> 
- 
-</details>
 
 
 
