@@ -38,6 +38,463 @@
 ![erd 편집](https://github.com/oals/PortfolioSocialNetWork-backEnd/assets/136543676/b4cfe8ed-cc24-40ff-baf6-abe7a57b2b43)
 
 
+<br>
+<br>
+
+# Entity
+
+<details> 
+ <summary> Member Entity 
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class Member {
+
+    @Id
+    private String memberId;
+
+    private String memberPswd;
+    private String memberEmail;
+    private String memberName;
+    private String memberPhone;
+    private String memberAddress;
+    private String memberDate;
+
+    private String memberJobTitle;
+    private String memberSchoolName;
+
+    private String memberProfileImage;
+    private String createDate;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+
+    public static Member createMember(MemberDTO memberDTO){
+        Member member = new Member();
+        member.setMemberId(memberDTO.getMemberId());
+        member.setMemberName(memberDTO.getMemberName());
+        member.setMemberEmail(memberDTO.getMemberEmail());
+        member.setMemberPhone(memberDTO.getMemberPhone());
+        member.setMemberDate(memberDTO.getMemberDate());
+        member.setMemberAddress(memberDTO.getMemberAddress());
+        member.setMemberJobTitle(memberDTO.getMemberJobTitle());
+        member.setMemberSchoolName(memberDTO.getMemberSchoolName());
+        member.setMemberProfileImage("c:/SocialNetwork/normalProfileImage.jpg");
+        member.setCreateDate(LocalDateTime.now().toString());
+        member.setRole(Role.USER); //일반 유저 디폴트값 5등급
+
+        // 암호화
+        member.setMemberPswd(memberDTO.getMemberPswd());
+
+        return member;
+    }
+
+    }
+
+ 
+</details>
+
+
+<details>
+ <summary> Feed Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class Feed {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedId;
+
+    private String feedContent;
+
+    private String feedDate;
+
+    private String feedThumnailImage;
+
+    @OneToMany(mappedBy = "feed")
+    private List<FeedComment> feedCommentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "feed")
+    private List<FeedImage> feedImageList = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "feed")
+    private List<FeedTag> feedTagList = new ArrayList<>();
+
+
+
+    @OneToMany(mappedBy = "feed")
+    private List<FeedLike> feedLikeList = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="member_id")
+    private Member member;
+
+
+
+    }
+
+
+
+ 
+</details>
+
+
+<details>
+ <summary> FeedComment Entity
+ 
+ </summary> 
+
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class FeedComment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedCommentId;
+
+    private String feedCommentContent;
+
+    private String feedCommentDate;
+
+    private Long feedCommentParent; //부모 댓글 번호
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="feed_id")
+    private Feed feed; //피드
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="member_id")
+    private Member member; //댓글 작성자
+
+
+    }
+
+ 
+ 
+</details>
+
+
+<details>
+ <summary> FeedImage Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class FeedImage {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedImageNo;
+
+    private String feedImage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="feed_id")
+    private Feed feed;
+
+
+    }
+
+
+ 
+</details>
+
+
+<details>
+ <summary> FeedLike Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class FeedLike {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedLikeId;
+
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="feed_id")
+    private Feed feed;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="member_id")
+    private Member member;
+
+
+    }
+
+
+ 
+</details>
+
+
+<details>
+ <summary> FeedTag Entity
+ 
+ </summary> 
+
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class FeedTag {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long feedTagId;
+
+    private String feedTagName;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="feed_id")
+    private Feed feed;
+
+
+
+    }
+
+
+ 
+</details>
+
+
+<details>
+ <summary> Follow Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class Follow {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long followId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "follow_member_id", referencedColumnName = "memberId")
+    private Member followMember;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "follower_member_id", referencedColumnName = "memberId")
+    private Member followerMember;
+
+    }
+
+
+
+ 
+</details>
+
+
+<details>
+ <summary> ChatRoom Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class ChatRoom {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long chatRoomId;
+
+    private String LastUseDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_member_id", referencedColumnName = "memberId")
+    private Member chatMemberId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_member_id2", referencedColumnName = "memberId")
+    private Member chatMemberId2;
+
+
+    @OneToMany(mappedBy = "chatRoom")
+    private List<ChatMessage> chatMessageList = new ArrayList<>();
+
+
+    public void updateLastUseDate(String useDate){
+        this.LastUseDate = useDate;
+    }
+
+    }
+
+
+
+ 
+</details>
+
+
+<details>
+ <summary> ChatMessage Entity
+ 
+ </summary> 
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class ChatMessage {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long chatMessageNo;
+
+    private String chatMessage;
+
+    private String chatMessageDate;
+
+    @ManyToOne(fetch =  FetchType.LAZY)
+    @JoinColumn(name="member_id")
+    private Member member; //작성자
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="chat_room_id")
+    private ChatRoom chatRoom;
+
+
+
+
+
+
+    }
+
+
+ 
+</details>
+
+
+<details>
+ <summary> Notification Entity
+ 
+ </summary> 
+
+
+
+
+
+    @Entity
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class Notification {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long notificationNo;
+
+    private int notificationMessageType;
+
+    private boolean viewChk;
+
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "comment_feed_id", referencedColumnName = "feedId")
+    private Feed feedComment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "like_feed_id", referencedColumnName = "feedId")
+    private Feed feedLike;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "follow_member_id", referencedColumnName = "memberId")
+    private Member follow;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="chat_room_id")
+    private ChatRoom chatRoom;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "read_member_id", referencedColumnName = "memberId")
+    private Member readMember;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "send_member_id", referencedColumnName = "memberId")
+    private Member sendMember;
+
+
+
+    public void viewChkFunction(){
+      this.viewChk = true;
+    }
+
+
+
+
+    }
+
+
+
+
+ 
+</details>
+
+
+
+
+
 # 핵심 기능 및 페이지 소개
 
 
