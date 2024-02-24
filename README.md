@@ -9,7 +9,7 @@
 백엔드는 스프링부트를 사용 하였고 <br>
 프론트엔드는 리엑트를 사용하여 개발했습니다.
 
-프론트엔드 코드 주소 : https://github.com/oals/PortfolioSocialNetWork-frontEnd
+프론트엔드 코드 주소 : [https://github.com/oals/PortfolioSocialNetWork-frontEnd](https://github.com/oals/PortfolioSocialNetWork-frontEnd/tree/main/src)
 
 
 # 제작기간 & 참여 인원
