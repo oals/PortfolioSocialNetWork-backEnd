@@ -21,9 +21,10 @@ public class SimpleTextHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         System.out.println("깃 머지 테스트 수정1회 profile에서 수정2");
         System.out.println("Received message123: " + message.getPayload());
-        System.out.println("깃 머지 테스트23");
-        System.out.println("충돌 테스트 social")
+        System.out.println("깃 머지 테스트");
+        System.out.println("충돌 테스트");
     }
+
     public void mergeTest(){
         System.out.println("profile머지테스트");
     }
