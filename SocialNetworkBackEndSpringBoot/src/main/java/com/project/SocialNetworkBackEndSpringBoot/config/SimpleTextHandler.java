@@ -19,8 +19,9 @@ public class SimpleTextHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        System.out.println("깃 머지 테스트");
+        System.out.println("깃 머지 테스트 수정1회");
         System.out.println("Received message123: " + message.getPayload());
+        System.out.println("깃 머지 테스트")
     }
 
     @Override
