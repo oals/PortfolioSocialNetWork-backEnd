@@ -24,6 +24,9 @@ public class SimpleTextHandler extends TextWebSocketHandler {
         System.out.println("깃 머지 테스트")
     }
 
+    public void mergeTest(){
+        System.out.println("머지테스트");
+    }
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.put(session.getId(), session);
