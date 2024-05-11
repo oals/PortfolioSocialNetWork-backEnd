@@ -34,10 +34,6 @@ public class SimpleTextHandler extends TextWebSocketHandler {
         sessions.remove(session.getId());
     }
 
-    public void gitmergerFunct(){
-        System.out.println("충돌 테스트");
-    }
-
     public void sendMessageToAll(String sendMemberId, String readMemberId) throws Exception {
         log.info(sessions);
 
