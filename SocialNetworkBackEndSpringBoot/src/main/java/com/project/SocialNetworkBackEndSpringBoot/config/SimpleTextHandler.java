@@ -26,7 +26,7 @@ public class SimpleTextHandler extends TextWebSocketHandler {
     }
 
     public void mergeTest(){
-        System.out.println("profile머지테스트");
+        System.out.println("profile머지테스트 파일추가 테스트");
     }
 
     public void mergeTestScoial(){
